@@ -235,7 +235,7 @@
                         required
                         rows="4"
                         placeholder="Ex: 5 sacos de cimento, 2m³ de areia, serviço de pedreiro, caminhão para transporte, etc."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition resize-none"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition resize-none"
                     ></textarea>
                 </div>
 
@@ -289,7 +289,7 @@
         </div>
     </div>
 
-    <!-- 🚀 CÓDIGO FIREBASE + APPS SCRIPT + PLANILHA - TUDO INTEGRADO -->
+    <!-- 🚀 CÓDIGO FIREBASE + APPS SCRIPT + PLANILHA - TUDO INTEGRADO E CORRIGIDO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -297,314 +297,309 @@
         // ⚙️ DADOS DE CONEXÃO DO SEU PROJETO
         const firebaseConfig = {
             apiKey: "AIzaSyDUgHEX610xqLmEmM6F_d0sOzbYxLLxT8w",
-authDomain: "willobras.firebaseapp.com",
-databaseURL: "https://willobras-default-rtdb.firebaseio.com",
-projectId: "willobras",
-storageBucket: "willobras.firebasestorage.app",
-messagingSenderId: "66370500400",
-appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const colaboracoesRef = ref(db, "colaboracoes_recreio");
-const doacoesRef = ref(db, "doacoes_materiais");
-
-// 📊 DADOS DA SUA PLANILHA GOOGLE E APPS SCRIPT - CONFIGURADO 100%
-const ID_PLANILHA = "1qlgjXmXduR7QNp-kyfn2bNvUNNHIRvYZIFki9pDgFbE";
-const ABA_COLABORACOES = "Colaborações";
-const ABA_DOACOES = "Doações";
-
-// ✅ LINK DO SEU APPS SCRIPT (COLE AQUI O LINK GERADO)
-const LINK_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzTREaIFx9OhlR7eAJT5hUVOK-6Mf63v9RoB4bTC2DHjDTWCBpA018oVbtUXbeThOvr/exec";
-
-// CONFIGURAÇÕES DO SISTEMA
-const SENHA_ADMIN = "WJ321";
-let listaColaboradores = [];
-let listaDoacoes = [];
-let acessoAdmin = false;
-
-// ELEMENTOS DA PÁGINA
-const campoNome = document.getElementById('nome');
-const campoValor = document.getElementById('valor');
-const botaoSalvar = document.getElementById('botaoSalvar');
-const botaoAdmin = document.getElementById('botaoAdmin');
-const botaoLimpar = document.getElementById('botaoLimpar');
-const modalSenha = document.getElementById('modalSenha');
-const campoSenha = document.getElementById('campoSenha');
-const botaoCancelar = document.getElementById('botaoCancelar');
-const botaoAcessar = document.getElementById('botaoAcessar');
-const avisoErro = document.getElementById('avisoErro');
-const totalGeral = document.getElementById('totalGeral');
-const quantidadePessoas = document.getElementById('quantidadePessoas');
-const contadorLista = document.getElementById('contadorLista');
-const resultadoCalculo = document.getElementById('resultadoCalculo');
-const listaColaboradoresEl = document.getElementById('listaColaboradores');
-const areaCarregamento = document.getElementById('areaCarregamento');
-
-// Elementos do campo de doações
-const campoNomeDoacao = document.getElementById('nomeDoacao');
-const campoDescricaoDoacao = document.getElementById('descricaoDoacao');
-const botaoSalvarDoacao = document.getElementById('botaoSalvarDoacao');
-const listaDoacoesEl = document.getElementById('listaDoacoes');
-
-// 📤 FUNÇÃO INTEGRADA: FIREBASE + APPS SCRIPT + PLANILHA GOOGLE
-async function salvarNaPlanilha(dados, tipo) {
-    try {
-        let nomeAba = tipo === 'colaboracao' ? ABA_COLABORACOES : ABA_DOACOES;
-        let dadosEnvio = {
-            idPlanilha: ID_PLANILHA,
-            aba: nomeAba,
-            data: dados.dataCadastro,
-            nome: dados.nome
+            authDomain: "willobras.firebaseapp.com",
+            databaseURL: "https://willobras-default-rtdb.firebaseio.com",
+            projectId: "willobras",
+            storageBucket: "willobras.firebasestorage.app",
+            messagingSenderId: "66370500400",
+            appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
         };
 
-        if (tipo === 'colaboracao') {
-            dadosEnvio.valor = dados.valor;
-        } else {
-            dadosEnvio.descricao = dados.descricao;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const colaboracoesRef = ref(db, "colaboracoes_recreio");
+        const doacoesRef = ref(db, "doacoes_materiais");
+
+        // 📊 DADOS DA SUA PLANILHA GOOGLE E APPS SCRIPT - CONFIGURADO 100%
+        const ID_PLANILHA = "1qlgjXmXduR7QNp-kyfn2bNvUNNHIRvYZIFki9pDgFbE";
+        const ABA_COLABORACOES = "Colaborações";
+        const ABA_DOACOES = "Doações";
+
+        // ✅ COLE AQUI O LINK NOVO GERADO NO APPS SCRIPT
+        const LINK_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxhff2kFVLHrE9ieru3Zf0ljarux0nItd30_dY4w_yvDF4gs5Xdy03fa_jxzqAyqBy9/exec";
+
+        // CONFIGURAÇÕES DO SISTEMA
+        const SENHA_ADMIN = "WJ321";
+        let listaColaboradores = [];
+        let listaDoacoes = [];
+        let acessoAdmin = false;
+
+        // ELEMENTOS DA PÁGINA
+        const campoNome = document.getElementById('nome');
+        const campoValor = document.getElementById('valor');
+        const botaoSalvar = document.getElementById('botaoSalvar');
+        const botaoAdmin = document.getElementById('botaoAdmin');
+        const botaoLimpar = document.getElementById('botaoLimpar');
+        const modalSenha = document.getElementById('modalSenha');
+        const campoSenha = document.getElementById('campoSenha');
+        const botaoCancelar = document.getElementById('botaoCancelar');
+        const botaoAcessar = document.getElementById('botaoAcessar');
+        const avisoErro = document.getElementById('avisoErro');
+        const totalGeral = document.getElementById('totalGeral');
+        const quantidadePessoas = document.getElementById('quantidadePessoas');
+        const contadorLista = document.getElementById('contadorLista');
+        const resultadoCalculo = document.getElementById('resultadoCalculo');
+        const listaColaboradoresEl = document.getElementById('listaColaboradores');
+        const areaCarregamento = document.getElementById('areaCarregamento');
+
+        // Elementos do campo de doações
+        const campoNomeDoacao = document.getElementById('nomeDoacao');
+        const campoDescricaoDoacao = document.getElementById('descricaoDoacao');
+        const botaoSalvarDoacao = document.getElementById('botaoSalvarDoacao');
+        const listaDoacoesEl = document.getElementById('listaDoacoes');
+
+        // 📤 FUNÇÃO INTEGRADA CORRIGIDA: SEM NO-CORS, ENVIA DADOS CERTOS
+        async function salvarNaPlanilha(dados, tipo) {
+            try {
+                let nomeAba = tipo === 'colaboracao' ? ABA_COLABORACOES : ABA_DOACOES;
+                let dadosEnvio = {
+                    aba: nomeAba,
+                    data: dados.dataCadastro,
+                    nome: dados.nome
+                };
+
+                if (tipo === 'colaboracao') {
+                    dadosEnvio.valor = dados.valor;
+                } else {
+                    dadosEnvio.descricao = dados.descricao;
+                }
+
+                const resposta = await fetch(LINK_APPS_SCRIPT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dadosEnvio)
+                });
+
+                const resultado = await resposta.json();
+                console.log("✅ Resposta da Planilha:", resultado);
+                alert(resultado.sucesso ? "✅ Salvo na planilha!" : "❌ Erro: " + resultado.mensagem);
+
+            } catch (erro) {
+                console.error("⚠️ Erro ao salvar na planilha:", erro);
+                alert("❌ Falha na comunicação com a planilha");
+            }
         }
 
-        // Envia dados para o Apps Script
-        const resposta = await fetch(LINK_APPS_SCRIPT, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(dadosEnvio)
+        // FUNÇÕES AUXILIARES
+        function mostrarCarregamento() {
+            areaCarregamento.classList.remove('escondido');
+        }
+
+        function esconderCarregamento() {
+            areaCarregamento.classList.add('escondido');
+        }
+
+        function formatarValorParaSalvar(textoValor) {
+            return textoValor.replace(/\./g, '').replace(',', '.');
+        }
+
+        function formatarValorBRL(valorNumerico) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valorNumerico);
+        }
+
+        // 🚀 SALVAR COLABORAÇÃO
+        async function salvarDados() {
+            const nome = campoNome.value.trim();
+            const valorTexto = campoValor.value.trim();
+
+            if (!nome) {
+                alert("⚠️ Digite seu nome completo!");
+                return;
+            }
+            if (!valorTexto) {
+                alert("⚠️ Digite o valor da colaboração!");
+                return;
+            }
+
+            const valorNumerico = parseFloat(formatarValorParaSalvar(valorTexto));
+            if (isNaN(valorNumerico) || valorNumerico <= 0) {
+                alert("⚠️ Digite um valor válido maior que zero! Ex: 50,00");
+                return;
+            }
+
+            mostrarCarregamento();
+
+            try {
+                const dadosParaSalvar = {
+                    nome: nome,
+                    valor: valorNumerico,
+                    dataCadastro: new Date().toLocaleString('pt-BR')
+                };
+
+                await push(colaboracoesRef, dadosParaSalvar);
+                await salvarNaPlanilha(dadosParaSalvar, 'colaboracao');
+
+                campoNome.value = '';
+                campoValor.value = '';
+
+            } catch (erro) {
+                console.error("❌ Erro ao salvar:", erro);
+                alert("❌ Ocorreu um erro ao salvar. Tente novamente.");
+            } finally {
+                esconderCarregamento();
+            }
+        }
+
+        // 🚀 SALVAR DOAÇÃO / AJUDA
+        async function registrarDoacao() {
+            const nome = campoNomeDoacao.value.trim();
+            const descricao = campoDescricaoDoacao.value.trim();
+
+            if (!nome) {
+                alert("⚠️ Digite seu nome completo!");
+                return;
+            }
+            if (!descricao) {
+                alert("⚠️ Descreva o que você quer doar ou oferecer!");
+                return;
+            }
+
+            mostrarCarregamento();
+
+            try {
+                const dadosParaSalvar = {
+                    nome: nome,
+                    descricao: descricao,
+                    dataCadastro: new Date().toLocaleString('pt-BR')
+                };
+
+                await push(doacoesRef, dadosParaSalvar);
+                await salvarNaPlanilha(dadosParaSalvar, 'doacao');
+
+                campoNomeDoacao.value = '';
+                campoDescricaoDoacao.value = '';
+
+            } catch (erro) {
+                console.error("❌ Erro ao registrar doação:", erro);
+                alert("❌ Ocorreu um erro ao salvar. Tente novamente.");
+            } finally {
+                esconderCarregamento();
+            }
+        }
+
+        // 📥 CARREGAR DADOS EM TEMPO REAL DO FIREBASE
+        onValue(colaboracoesRef, (snapshot) => {
+            mostrarCarregamento();
+            listaColaboradores = [];
+
+            if (snapshot.exists()) {
+                snapshot.forEach((item) => {
+                    listaColaboradores.push({
+                        id: item.key,
+                        ...item.val()
+                    });
+                });
+            }
+
+            atualizarTelaPrincipal();
+            esconderCarregamento();
+        }, (erro) => {
+            console.error("❌ Erro ao carregar dados:", erro);
+            esconderCarregamento();
         });
 
-        console.log("✅ Dados enviados para Planilha Google com sucesso!");
-    } catch (erro) {
-        console.error("⚠️ Erro ao salvar na planilha:", erro);
-    }
-}
+        onValue(doacoesRef, (snapshot) => {
+            listaDoacoes = [];
 
-// FUNÇÕES AUXILIARES
-function mostrarCarregamento() {
-    areaCarregamento.classList.remove('escondido');
-}
+            if (snapshot.exists()) {
+                snapshot.forEach((item) => {
+                    listaDoacoes.push({
+                        id: item.key,
+                        ...item.val()
+                    });
+                });
+            }
 
-function esconderCarregamento() {
-    areaCarregamento.classList.add('escondido');
-}
+            atualizarListaDoacoes();
+        });
 
-function formatarValorParaSalvar(textoValor) {
-    return textoValor.replace(/\./g, '').replace(',', '.');
-}
+        // 🔄 ATUALIZAR VALORES E LISTA NA TELA
+        function atualizarTelaPrincipal() {
+            const total = listaColaboradores.reduce((soma, item) => soma + item.valor, 0);
+            const qtdPessoas = listaColaboradores.length;
 
-function formatarValorBRL(valorNumerico) {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(valorNumerico);
-}
+            totalGeral.innerText = formatarValorBRL(total);
+            quantidadePessoas.innerText = qtdPessoas;
+            contadorLista.innerText = `${qtdPessoas} pessoa${qtdPessoas !== 1 ? 's' : ''}`;
 
-// 🚀 SALVAR COLABORAÇÃO
-async function salvarDados() {
-    const nome = campoNome.value.trim();
-    const valorTexto = campoValor.value.trim();
+            if (qtdPessoas === 0) {
+                resultadoCalculo.innerText = '0,00';
+                listaColaboradoresEl.innerHTML = '<p class="text-gray-500 text-center py-10">Nenhuma colaboração cadastrada ainda. Seja o primeiro!</p>';
+                return;
+            }
 
-    if (!nome) {
-        alert("⚠️ Digite seu nome completo!");
-        return;
-    }
-    if (!valorTexto) {
-        alert("⚠️ Digite o valor da colaboração!");
-        return;
-    }
+            const textosValores = listaColaboradores.map(item => formatarValorBRL(item.valor).replace('R$', '').trim());
+            resultadoCalculo.innerText = textosValores.join(' + ');
 
-    const valorNumerico = parseFloat(formatarValorParaSalvar(valorTexto));
-    if (isNaN(valorNumerico) || valorNumerico <= 0) {
-        alert("⚠️ Digite um valor válido maior que zero! Ex: 50,00");
-        return;
-    }
+            listaColaboradoresEl.innerHTML = '';
+            listaColaboradores.forEach(item => {
+                const linha = document.createElement('div');
+                linha.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-claro transition';
 
-    mostrarCarregamento();
+                const conteudo = document.createElement('div');
+                conteudo.className = 'flex-1';
+                conteudo.innerHTML = `
+                    <p class="font-medium text-escuro">${item.nome}</p>
+                    <p class="text-sm text-gray-500">Valor: ${formatarValorBRL(item.valor)} <span class="text-xs">• ${item.dataCadastro}</span></p>
+                `;
 
-    try {
-        const dadosParaSalvar = {
-            nome: nome,
-            valor: valorNumerico,
-            dataCadastro: new Date().toLocaleString('pt-BR')
-        };
+                if (acessoAdmin) {
+                    const botaoExcluir = document.createElement('button');
+                    botaoExcluir.className = 'text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition';
+                    botaoExcluir.title = 'Excluir colaboração';
+                    botaoExcluir.innerHTML = '<i class="fa fa-trash"></i>';
+                    botaoExcluir.onclick = () => excluirItem(item.id, 'colaboracao');
+                    linha.appendChild(botaoExcluir);
+                }
 
-        // Salva no Firebase
-        await push(colaboracoesRef, dadosParaSalvar);
-        // Salva na Planilha Google via Apps Script
-        await salvarNaPlanilha(dadosParaSalvar, 'colaboracao');
-
-        campoNome.value = '';
-        campoValor.value = '';
-        alert("✅ Colaboração registrada com sucesso! Agradecemos muito sua ajuda.");
-
-    } catch (erro) {
-        console.error("❌ Erro ao salvar:", erro);
-        alert("❌ Ocorreu um erro ao salvar. Tente novamente ou verifique sua conexão.");
-    } finally {
-        esconderCarregamento();
-    }
-}
-
-// 🚀 SALVAR DOAÇÃO / AJUDA
-async function registrarDoacao() {
-    const nome = campoNomeDoacao.value.trim();
-    const descricao = campoDescricaoDoacao.value.trim();
-
-    if (!nome) {
-        alert("⚠️ Digite seu nome completo!");
-        return;
-    }
-    if (!descricao) {
-        alert("⚠️ Descreva o que você quer doar ou oferecer!");
-        return;
-    }
-
-    mostrarCarregamento();
-
-    try {
-        const dadosParaSalvar = {
-            nome: nome,
-            descricao: descricao,
-            dataCadastro: new Date().toLocaleString('pt-BR')
-        };
-
-        // Salva no Firebase
-        await push(doacoesRef, dadosParaSalvar);
-        // Salva na Planilha Google via Apps Script
-        await salvarNaPlanilha(dadosParaSalvar, 'doacao');
-
-        campoNomeDoacao.value = '';
-        campoDescricaoDoacao.value = '';
-        alert("✅ Sua doação/oferta foi registrada! Entraremos em contato em breve.");
-
-    } catch (erro) {
-        console.error("❌ Erro ao registrar doação:", erro);
-        alert("❌ Ocorreu um erro ao salvar. Tente novamente.");
-    } finally {
-        esconderCarregamento();
-    }
-}
-
-// 📥 CARREGAR DADOS EM TEMPO REAL DO FIREBASE
-onValue(colaboracoesRef, (snapshot) => {
-    mostrarCarregamento();
-    listaColaboradores = [];
-
-    if (snapshot.exists()) {
-        snapshot.forEach((item) => {
-            listaColaboradores.push({
-                id: item.key,
-                ...item.val()
+                linha.appendChild(conteudo);
+                listaColaboradoresEl.appendChild(linha);
             });
-        });
-    }
+        }
 
-    atualizarTelaPrincipal();
-    esconderCarregamento();
-}, (erro) => {
-    console.error("❌ Erro ao carregar dados:", erro);
-    esconderCarregamento();
-});
+        function atualizarListaDoacoes() {
+            if (listaDoacoes.length === 0) {
+                listaDoacoesEl.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma doação cadastrada ainda. Seja o primeiro a ajudar!</p>';
+                return;
+            }
 
-onValue(doacoesRef, (snapshot) => {
-    listaDoacoes = [];
+            listaDoacoesEl.innerHTML = '';
+            listaDoacoes.forEach(item => {
+                const linha = document.createElement('div');
+                linha.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-start justify-between gap-3 hover:bg-green-50 transition';
 
-    if (snapshot.exists()) {
-        snapshot.forEach((item) => {
-            listaDoacoes.push({
-                id: item.key,
-                ...item.val()
+                const conteudo = document.createElement('div');
+                conteudo.className = 'flex-1';
+                conteudo.innerHTML = `
+                    <p class="font-medium text-escuro">${item.nome}</p>
+                    <p class="text-sm text-gray-700 mt-1">O que oferece: ${item.descricao}</p>
+                    <p class="text-xs text-gray-500 mt-1">${item.dataCadastro}</p>
+                `;
+
+                if (acessoAdmin) {
+                    const botaoExcluir = document.createElement('button');
+                    botaoExcluir.className = 'text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition';
+                    botaoExcluir.title = 'Excluir registro';
+                    botaoExcluir.innerHTML = '<i class="fa fa-trash"></i>';
+                    botaoExcluir.onclick = () => excluirItem(item.id, 'doacao');
+                    linha.appendChild(botaoExcluir);
+                }
+
+                linha.appendChild(conteudo);
+                listaDoacoesEl.appendChild(linha);
             });
-        });
-    }
-
-    atualizarListaDoacoes();
-});
-
-// 🔄 ATUALIZAR VALORES E LISTA NA TELA
-function atualizarTelaPrincipal() {
-    const total = listaColaboradores.reduce((soma, item) => soma + item.valor, 0);
-    const qtdPessoas = listaColaboradores.length;
-
-    totalGeral.innerText = formatarValorBRL(total);
-    quantidadePessoas.innerText = qtdPessoas;
-    contadorLista.innerText = `${qtdPessoas} pessoa${qtdPessoas !== 1 ? 's' : ''}`;
-
-    if (qtdPessoas === 0) {
-        resultadoCalculo.innerText = '0,00';
-        listaColaboradoresEl.innerHTML = '<p class="text-gray-500 text-center py-10">Nenhuma colaboração cadastrada ainda. Seja o primeiro!</p>';
-        return;
-    }
-
-    const textosValores = listaColaboradores.map(item => formatarValorBRL(item.valor).replace('R$', '').trim());
-    resultadoCalculo.innerText = textosValores.join(' + ');
-
-    listaColaboradoresEl.innerHTML = '';
-    listaColaboradores.forEach(item => {
-        const linha = document.createElement('div');
-        linha.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-claro transition';
-
-        const conteudo = document.createElement('div');
-        conteudo.className = 'flex-1';
-        conteudo.innerHTML = `
-            <p class="font-medium text-escuro">${item.nome}</p>
-            <p class="text-sm text-gray-500">Valor: ${formatarValorBRL(item.valor)} <span class="text-xs">• ${item.dataCadastro}</span></p>
-        `;
-
-        if (acessoAdmin) {
-            const botaoExcluir = document.createElement('button');
-            botaoExcluir.className = 'text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition';
-            botaoExcluir.title = 'Excluir colaboração';
-            botaoExcluir.innerHTML = '<i class="fa fa-trash"></i>';
-            botaoExcluir.onclick = () => excluirItem(item.id, 'colaboracao');
-            linha.appendChild(botaoExcluir);
         }
 
-        linha.appendChild(conteudo);
-        listaColaboradoresEl.appendChild(linha);
-    });
-}
+        // 🗑️ EXCLUIR ITEM
+        async function excluirItem(id, tipo) {
+            if (!confirm("⚠️ Tem certeza que deseja excluir este registro? Essa ação não pode ser desfeita!")) return;
 
-function atualizarListaDoacoes() {
-    if (listaDoacoes.length === 0) {
-        listaDoacoesEl.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma doação cadastrada ainda. Seja o primeiro a ajudar!</p>';
-        return;
-    }
-
-    listaDoacoesEl.innerHTML = '';
-    listaDoacoes.forEach(item => {
-        const linha = document.createElement('div');
-        linha.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-start justify-between gap-3 hover:bg-green-50 transition';
-
-        const conteudo = document.createElement('div');
-        conteudo.className = 'flex-1';
-        conteudo.innerHTML = `
-            <p class="font-medium text-escuro">${item.nome}</p>
-            <p class="text-sm text-gray-700 mt-1">O que oferece: ${item.descricao}</p>
-            <p class="text-xs text-gray-500 mt-1">${item.dataCadastro}</p>
-        `;
-
-        if (acessoAdmin) {
-            const botaoExcluir = document.createElement('button');
-            botaoExcluir.className = 'text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition';
-            botaoExcluir.title = 'Excluir registro';
-            botaoExcluir.innerHTML = '<i class="fa fa-trash"></i>';
-            botaoExcluir.onclick = () => excluirItem(item.id, 'doacao');
-            linha.appendChild(botaoExcluir);
-        }
-
-        linha.appendChild(conteudo);
-        listaDoacoesEl.appendChild(linha);
-    });
-}
-
-// 🗑️ EXCLUIR ITEM
-async function excluirItem(id, tipo) {
-    if (!confirm("⚠️ Tem certeza que deseja excluir este registro? Essa ação não pode ser desfeita!")) return;
-
-    mostrarCarregamento();
+            mostrarCarregamento();
     try {
         const referencia = tipo === 'colaboracao' ? ref(db, `colaboracoes_recreio/${id}`) : ref(db, `doacoes_materiais/${id}`);
         await remove(referencia);
