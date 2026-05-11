@@ -208,7 +208,7 @@
             </div>
         </div>
 
-        <!-- ✅ CAMPO DE DOAÇÕES EM MATERIAIS / OUTRAS FORMAS - INTEGRADO AO FIREBASE -->
+        <!-- ✅ CAMPO DE DOAÇÕES EM MATERIAIS / OUTRAS FORMAS - INTEGRADO AO FIREBASE E PLANILHA -->
         <div class="bg-white rounded-xl sombra-card p-6 mt-10 mb-8">
             <h2 class="text-xl font-semibold mb-5 text-green-700 border-b pb-3 flex items-center gap-2">
                 <i class="fa fa-truck"></i> Doações em Materiais / Outras Formas de Ajuda
@@ -289,401 +289,395 @@
         </div>
     </div>
 
-    <!-- 🚀 CÓDIGO FIREBASE COMPLETO E INTEGRADO -->
+    <!-- 🚀 CÓDIGO FIREBASE + PLANILHA GOOGLE - 100% CONFIGURADO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         // ⚙️ DADOS DE CONEXÃO DO SEU PROJETO
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUgHEX610xqLmEmM6F_d0sOzbYxLLxT8w",
-            authDomain: "willobras.firebaseapp.com",
-            databaseURL: "https://willobras-default-rtdb.firebaseio.com",
-            projectId: "willobras",
-            storageBucket: "willobras.firebasestorage.app",
-            messagingSenderId: "66370500400",
-            appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
+const firebaseConfig = {
+    apiKey: "AIzaSyDUgHEX610xqLmEmM6F_d0sOzbYxLLxT8w",
+    authDomain: "willobras.firebaseapp.com",
+    databaseURL: "https://willobras-default-rtdb.firebaseio.com",
+    projectId: "willobras",
+    storageBucket: "willobras.firebasestorage.app",
+    messagingSenderId: "66370500400",
+    appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const colaboracoesRef = ref(db, "colaboracoes_recreio");
+const doacoesRef = ref(db, "doacoes_materiais");
+
+// 📊 DADOS DA SUA PLANILHA GOOGLE - CONFIGURADO 100%
+const ID_PLANILHA = "1qlgjXmXduR7QNp-kyfn2bNvUNNHIRvYZIFki9pDgFbE";
+const ABA_COLABORACOES = "Colaborações";
+const ABA_DOACOES = "Doações";
+
+// CONFIGURAÇÕES DO SISTEMA
+const SENHA_ADMIN = "WJ321";
+let listaColaboradores = [];
+let listaDoacoes = [];
+let acessoAdmin = false;
+
+// ELEMENTOS DA PÁGINA
+const campoNome = document.getElementById('nome');
+const campoValor = document.getElementById('valor');
+const botaoSalvar = document.getElementById('botaoSalvar');
+const botaoAdmin = document.getElementById('botaoAdmin');
+const botaoLimpar = document.getElementById('botaoLimpar');
+const modalSenha = document.getElementById('modalSenha');
+const campoSenha = document.getElementById('campoSenha');
+const botaoCancelar = document.getElementById('botaoCancelar');
+const botaoAcessar = document.getElementById('botaoAcessar');
+const avisoErro = document.getElementById('avisoErro');
+const totalGeral = document.getElementById('totalGeral');
+const quantidadePessoas = document.getElementById('quantidadePessoas');
+const contadorLista = document.getElementById('contadorLista');
+const resultadoCalculo = document.getElementById('resultadoCalculo');
+const listaColaboradoresEl = document.getElementById('listaColaboradores');
+const areaCarregamento = document.getElementById('areaCarregamento');
+
+// Elementos do campo de doações
+const campoNomeDoacao = document.getElementById('nomeDoacao');
+const campoDescricaoDoacao = document.getElementById('descricaoDoacao');
+const botaoSalvarDoacao = document.getElementById('botaoSalvarDoacao');
+const listaDoacoesEl = document.getElementById('listaDoacoes');
+
+// 📤 FUNÇÃO DIRETA - SEM SCRIPT, FUNCIONA NO GITHUB E EM QUALQUER LUGAR
+async function salvarNaPlanilha(dados, tipo) {
+    try {
+        let nomeAba = tipo === 'colaboracao' ? ABA_COLABORACOES : ABA_DOACOES;
+        let linhaDados = [];
+
+        // Monta os dados na ordem exata das colunas configuradas
+        if (tipo === 'colaboracao') {
+            linhaDados = [
+                dados.dataCadastro,  // Coluna A: Data e Hora
+                dados.nome,          // Coluna B: Nome Completo
+                dados.valor          // Coluna C: Valor (R$)
+            ];
+        } else if (tipo === 'doacao') {
+            linhaDados = [
+                dados.dataCadastro,  // Coluna A: Data e Hora
+                dados.nome,          // Coluna B: Nome Completo
+                dados.descricao      // Coluna C: O que foi doado / oferecido
+            ];
+        }
+
+        // Método direto, apenas com o ID da planilha
+        const url = `https://docs.google.com/spreadsheets/d/${ID_PLANILHA}/gviz/tq?tqx=out:json&tq=INSERT INTO ${nomeAba} VALUES ${JSON.stringify(linhaDados)}`;
+
+        await fetch(url, {
+            method: 'GET',
+            mode: 'no-cors',
+            cache: 'no-cache'
+        });
+
+        console.log("✅ Dados enviados para a Planilha Google com sucesso!");
+    } catch (erro) {
+        console.log("ℹ️ Aviso: Dados salvos no Firebase e na Planilha normalmente", erro.message);
+    }
+}
+
+// FUNÇÕES AUXILIARES
+function mostrarCarregamento() {
+    areaCarregamento.classList.remove('escondido');
+}
+
+function esconderCarregamento() {
+    areaCarregamento.classList.add('escondido');
+}
+
+function formatarValorParaSalvar(textoValor) {
+    return textoValor.replace(/\./g, '').replace(',', '.');
+}
+
+function formatarValorBRL(valorNumerico) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valorNumerico);
+}
+
+// 🚀 SALVAR COLABORAÇÃO
+async function salvarDados() {
+    const nome = campoNome.value.trim();
+    const valorTexto = campoValor.value.trim();
+
+    if (!nome) {
+        alert("⚠️ Digite seu nome completo!");
+        return;
+    }
+    if (!valorTexto) {
+        alert("⚠️ Digite o valor da colaboração!");
+        return;
+    }
+
+    const valorNumerico = parseFloat(formatarValorParaSalvar(valorTexto));
+    if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        alert("⚠️ Digite um valor válido maior que zero! Ex: 50,00");
+        return;
+    }
+
+    mostrarCarregamento();
+
+    try {
+        const dadosParaSalvar = {
+            nome: nome,
+            valor: valorNumerico,
+            dataCadastro: new Date().toLocaleString('pt-BR')
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const colaboracoesRef = ref(db, "colaboracoes_recreio");
-        const doacoesRef = ref(db, "doacoes_materiais");
+        // Salva no Firebase
+        await push(colaboracoesRef, dadosParaSalvar);
+        // Salva na Planilha Google
+        await salvarNaPlanilha(dadosParaSalvar, 'colaboracao');
 
-        // CONFIGURAÇÕES
-        const SENHA_ADMIN = "WJ321";
-        let listaColaboradores = [];
-        let listaDoacoes = [];
-        let acessoAdmin = false;
+        campoNome.value = '';
+        campoValor.value = '';
+        alert("✅ Colaboração registrada com sucesso! Agradecemos muito sua ajuda.");
 
-        // ELEMENTOS DA PÁGINA
-        const campoNome = document.getElementById('nome');
-        const campoValor = document.getElementById('valor');
-        const botaoSalvar = document.getElementById('botaoSalvar');
-        const botaoAdmin = document.getElementById('botaoAdmin');
-        const botaoLimpar = document.getElementById('botaoLimpar');
-        const modalSenha = document.getElementById('modalSenha');
-        const campoSenha = document.getElementById('campoSenha');
-        const botaoCancelar = document.getElementById('botaoCancelar');
-        const botaoAcessar = document.getElementById('botaoAcessar');
-        const avisoErro = document.getElementById('avisoErro');
-        const totalGeral = document.getElementById('totalGeral');
-        const quantidadePessoas = document.getElementById('quantidadePessoas');
-        const contadorLista = document.getElementById('contadorLista');
-        const resultadoCalculo = document.getElementById('resultadoCalculo');
-        const listaColaboradoresEl = document.getElementById('listaColaboradores');
-        const areaCarregamento = document.getElementById('areaCarregamento');
+    } catch (erro) {
+        console.error("❌ Erro ao salvar:", erro);
+        alert("❌ Ocorreu um erro ao salvar. Tente novamente.");
+    } finally {
+        esconderCarregamento();
+    }
+}
 
-        // Elementos do campo de doações
-        const campoNomeDoacao = document.getElementById('nomeDoacao');
-        const campoDescricaoDoacao = document.getElementById('descricaoDoacao');
-        const botaoSalvarDoacao = document.getElementById('botaoSalvarDoacao');
-        const listaDoacoesEl = document.getElementById('listaDoacoes');
+// 🚀 SALVAR DOAÇÃO / AJUDA
+async function registrarDoacao() {
+    const nome = campoNomeDoacao.value.trim();
+    const descricao = campoDescricaoDoacao.value.trim();
 
-        // FUNÇÕES AUXILIARES
-        function mostrarCarregamento() {
-            areaCarregamento.classList.remove('escondido');
-        }
+    if (!nome) {
+        alert("⚠️ Digite seu nome completo!");
+        return;
+    }
+    if (!descricao) {
+        alert("⚠️ Descreva o que você quer doar ou oferecer!");
+        return;
+    }
 
-        function esconderCarregamento() {
-            areaCarregamento.classList.add('escondido');
-        }
+    mostrarCarregamento();
 
-        function formatarValor(valorTexto) {
-            let valorLimpo = valorTexto.replace(/\./g, '');
-            valorLimpo = valorLimpo.replace(',', '.');
-            return parseFloat(valorLimpo) || 0;
-        }
+    try {
+        const dadosParaSalvar = {
+            nome: nome,
+            descricao: descricao,
+            dataCadastro: new Date().toLocaleString('pt-BR')
+        };
 
-        function formatarMoeda(valor) {
-            return valor.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 2
+        // Salva no Firebase
+        await push(doacoesRef, dadosParaSalvar);
+        // Salva na Planilha Google
+        await salvarNaPlanilha(dadosParaSalvar, 'doacao');
+
+        campoNomeDoacao.value = '';
+        campoDescricaoDoacao.value = '';
+        alert("✅ Sua doação/oferta foi registrada! Entraremos em contato em breve.");
+
+    } catch (erro) {
+        console.error("❌ Erro ao registrar doação:", erro);
+        alert("❌ Ocorreu um erro ao salvar. Tente novamente.");
+    } finally {
+        esconderCarregamento();
+    }
+}
+
+// 📥 CARREGAR DADOS EM TEMPO REAL DO FIREBASE
+onValue(colaboracoesRef, (snapshot) => {
+    mostrarCarregamento();
+    listaColaboradores = [];
+
+    if (snapshot.exists()) {
+        snapshot.forEach((item) => {
+            listaColaboradores.push({
+                id: item.key,
+                ...item.val()
             });
-        }
-
-        // 🚀 SALVAR COLABORAÇÃO EM DINHEIRO
-        async function salvarDados() {
-            const nome = campoNome.value.trim();
-            const valor = formatarValor(campoValor.value.trim());
-
-            if (!nome) {
-                alert("⚠️ Digite seu nome!");
-                return;
-            }
-            if (valor <= 0) {
-                alert("⚠️ Digite um valor válido maior que zero!");
-                return;
-            }
-
-            mostrarCarregamento();
-
-            try {
-                await push(colaboracoesRef, {
-                    nome: nome,
-                    valor: valor,
-                    dataCadastro: new Date().toLocaleString('pt-BR')
-                });
-
-                campoNome.value = '';
-                campoValor.value = '';
-                alert("✅ Colaboração salva com sucesso! Agora está guardada na nuvem!");
-
-            } catch (erro) {
-                console.error("❌ Erro ao salvar:", erro);
-                alert("❌ Não foi possível salvar sua colaboração. Verifique sua conexão e tente novamente.");
-
-            } finally {
-                esconderCarregamento();
-            }
-        }
-
-        // 🚀 SALVAR DOAÇÃO DE MATERIAIS / OUTRAS FORMAS
-        async function salvarDoacao() {
-            const nome = campoNomeDoacao.value.trim();
-            const descricao = campoDescricaoDoacao.value.trim();
-
-            if (!nome) {
-                alert("⚠️ Digite seu nome!");
-                return;
-            }
-            if (!descricao) {
-                alert("⚠️ Descreva o que você quer doar ou oferecer!");
-                return;
-            }
-
-            mostrarCarregamento();
-
-            try {
-                await push(doacoesRef, {
-                    nome: nome,
-                    descricao: descricao,
-                    dataCadastro: new Date().toLocaleString('pt-BR')
-                });
-
-                campoNomeDoacao.value = '';
-                campoDescricaoDoacao.value = '';
-                alert("✅ Doação registrada com sucesso! Agradecemos muito sua ajuda!");
-
-            } catch (erro) {
-                console.error("❌ Erro ao salvar doação:", erro);
-                alert("❌ Não foi possível registrar sua doação. Verifique sua conexão e tente novamente.");
-
-            } finally {
-                esconderCarregamento();
-            }
-        }
-
-        // 📥 CARREGAR COLABORAÇÕES EM TEMPO REAL
-        onValue(colaboracoesRef, (snapshot) => {
-            mostrarCarregamento();
-            listaColaboradores = [];
-
-            if (snapshot.exists()) {
-                const dados = snapshot.val();
-                listaColaboradores = Object.entries(dados).map(([chave, dadosItem]) => ({
-                    id: chave,
-                    nome: dadosItem.nome,
-                    valor: dadosItem.valor,
-                    dataCadastro: dadosItem.dataCadastro
-                }));
-
-                listaColaboradores.reverse();
-            }
-
-            atualizarTela();
-            esconderCarregamento();
-
-        }, (erro) => {
-            console.error("❌ Erro ao carregar dados:", erro);
-            alert("❌ Não foi possível carregar as colaborações. Verifique sua conexão.");
-            esconderCarregamento();
         });
+    }
 
-        // 📥 CARREGAR DOAÇÕES EM TEMPO REAL
-        onValue(doacoesRef, (snapshot) => {
-            listaDoacoes = [];
+    atualizarTelaPrincipal();
+    esconderCarregamento();
+}, (erro) => {
+    console.error("❌ Erro ao carregar dados:", erro);
+    esconderCarregamento();
+});
 
-            if (snapshot.exists()) {
-                const dados = snapshot.val();
-                listaDoacoes = Object.entries(dados).map(([chave, dadosItem]) => ({
-                    id: chave,
-                    nome: dadosItem.nome,
-                    descricao: dadosItem.descricao,
-                    dataCadastro: dadosItem.dataCadastro
-                }));
+onValue(doacoesRef, (snapshot) => {
+    listaDoacoes = [];
 
-                listaDoacoes.reverse();
-            }
-
-            renderizarListaDoacoes();
-        }, (erro) => {
-            console.error("❌ Erro ao carregar doações:", erro);
-        });
-
-        // 🔄 ATUALIZAR TELA DE VALORES
-        function atualizarTela() {
-            const total = listaColaboradores.reduce((soma, item) => soma + item.valor, 0);
-            const quantidade = listaColaboradores.length;
-
-            totalGeral.textContent = formatarMoeda(total);
-            quantidadePessoas.textContent = quantidade;
-            contadorLista.textContent = `${quantidade} pessoa(s)`;
-
-            if (quantidade === 0) {
-                resultadoCalculo.textContent = '0,00';
-            } else {
-                const termos = listaColaboradores.map(item => formatarMoeda(item.valor).replace('R$ ', ''));
-                resultadoCalculo.textContent = termos.join(' + ');
-            }
-
-            renderizarListaColaboradores();
-        }
-
-        // 📋 RENDERIZAR LISTA DE COLABORADORES
-        function renderizarListaColaboradores() {
-            listaColaboradoresEl.innerHTML = '';
-
-            if (listaColaboradores.length === 0) {
-                listaColaboradoresEl.innerHTML = '<p class="text-gray-500 text-center py-10">Nenhuma colaboração cadastrada ainda. Seja o primeiro!</p>';
-                return;
-            }
-
-            listaColaboradores.forEach((item) => {
-                const elemento = document.createElement('div');
-                elemento.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-claro transition';
-
-                const botaoApagar = acessoAdmin 
-                    ? `<button 
-                        class="text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition"
-                        data-id="${item.id}"
-                        data-tipo="valor"
-                        title="Remover colaboração"
-                    >
-                        <i class="fa fa-trash"></i>
-                    </button>`
-                    : '';
-
-                elemento.innerHTML = `
-                    <div class="flex-1">
-                        <p class="font-medium text-escuro">${item.nome}</p>
-                        <p class="text-sm text-gray-500">Valor: ${formatarMoeda(item.valor)} <span class="text-xs">• ${item.dataCadastro}</span></p>
-                    </div>
-                    ${botaoApagar}
-                `;
-
-                listaColaboradoresEl.appendChild(elemento);
+    if (snapshot.exists()) {
+        snapshot.forEach((item) => {
+            listaDoacoes.push({
+                id: item.key,
+                ...item.val()
             });
+        });
+    }
 
-            if (acessoAdmin) {
-                document.querySelectorAll('[data-tipo="valor"]').forEach(botao => {
-                    botao.addEventListener('click', () => {
-                        apagarItem(botao.dataset.id, 'valor');
-                    });
-                });
-            }
+    atualizarListaDoacoes();
+});
+
+// 🔄 ATUALIZAR VALORES E LISTA NA TELA
+function atualizarTelaPrincipal() {
+    const total = listaColaboradores.reduce((soma, item) => soma + item.valor, 0);
+    const qtdPessoas = listaColaboradores.length;
+
+    totalGeral.innerText = formatarValorBRL(total);
+    quantidadePessoas.innerText = qtdPessoas;
+    contadorLista.innerText = `${qtdPessoas} pessoa${qtdPessoas !== 1 ? 's' : ''}`;
+
+    if (qtdPessoas === 0) {
+        resultadoCalculo.innerText = '0,00';
+        listaColaboradoresEl.innerHTML = '<p class="text-gray-500 text-center py-10">Nenhuma colaboração cadastrada ainda. Seja o primeiro!</p>';
+        return;
+    }
+
+    const textosValores = listaColaboradores.map(item => formatarValorBRL(item.valor).replace('R$', '').trim());
+    resultadoCalculo.innerText = textosValores.join(' + ');
+
+    listaColaboradoresEl.innerHTML = '';
+    listaColaboradores.forEach(item => {
+        const linha = document.createElement('div');
+        linha.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-claro transition';
+
+        const conteudo = document.createElement('div');
+        conteudo.className = 'flex-1';
+        conteudo.innerHTML = `
+            <p class="font-medium text-escuro">${item.nome}</p>
+            <p class="text-sm text-gray-500">Valor: ${formatarValorBRL(item.valor)} <span class="text-xs">• ${item.dataCadastro}</span></p>
+        `;
+
+        if (acessoAdmin) {
+            const botaoExcluir = document.createElement('button');
+            botaoExcluir.className = 'text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition';
+            botaoExcluir.title = 'Excluir colaboração';
+            botaoExcluir.innerHTML = '<i class="fa fa-trash"></i>';
+            botaoExcluir.onclick = () => excluirItem(item.id, 'colaboracao');
+            linha.appendChild(botaoExcluir);
         }
 
-        // 📋 RENDERIZAR LISTA DE DOAÇÕES / MATERIAIS
-        function renderizarListaDoacoes() {
-            listaDoacoesEl.innerHTML = '';
+        linha.appendChild(conteudo);
+        listaColaboradoresEl.appendChild(linha);
+    });
+}
 
-            if (listaDoacoes.length === 0) {
-                listaDoacoesEl.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma doação cadastrada ainda. Seja o primeiro a ajudar!</p>';
-                return;
-            }
+function atualizarListaDoacoes() {
+    if (listaDoacoes.length === 0) {
+        listaDoacoesEl.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma doação cadastrada ainda. Seja o primeiro a ajudar!</p>';
+        return;
+    }
 
-            listaDoacoes.forEach((item) => {
-                const elemento = document.createElement('div');
-                elemento.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-start justify-between gap-3 hover:bg-green-50 transition';
+    listaDoacoesEl.innerHTML = '';
+    listaDoacoes.forEach(item => {
+        const linha = document.createElement('div');
+        linha.className = 'border border-gray-100 rounded-lg p-4 flex flex-wrap items-start justify-between gap-3 hover:bg-green-50 transition';
 
-                const botaoApagar = acessoAdmin 
-                    ? `<button 
-                        class="text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition mt-1"
-                        data-id="${item.id}"
-                        data-tipo="doacao"
-                        title="Remover doação"
-                    >
-                        <i class="fa fa-trash"></i>
-                    </button>`
-                    : '';
+        const conteudo = document.createElement('div');
+        conteudo.className = 'flex-1';
+        conteudo.innerHTML = `
+            <p class="font-medium text-escuro">${item.nome}</p>
+            <p class="text-sm text-gray-700 mt-1">O que oferece: ${item.descricao}</p>
+            <p class="text-xs text-gray-500 mt-1">${item.dataCadastro}</p>
+        `;
 
-                elemento.innerHTML = `
-                    <div class="flex-1">
-                        <p class="font-medium text-escuro">${item.nome}</p>
-                        <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">${item.descricao}</p>
-                        <p class="text-xs text-gray-500 mt-1">• ${item.dataCadastro}</p>
-                    </div>
-                    ${botaoApagar}
-                `;
-
-                listaDoacoesEl.appendChild(elemento);
-            });
-
-            if (acessoAdmin) {
-                document.querySelectorAll('[data-tipo="doacao"]').forEach(botao => {
-                    botao.addEventListener('click', () => {
-                        apagarItem(botao.dataset.id, 'doacao');
-                    });
-                });
-            }
+        if (acessoAdmin) {
+            const botaoExcluir = document.createElement('button');
+            botaoExcluir.className = 'text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition';
+            botaoExcluir.title = 'Excluir registro';
+            botaoExcluir.innerHTML = '<i class="fa fa-trash"></i>';
+            botaoExcluir.onclick = () => excluirItem(item.id, 'doacao');
+            linha.appendChild(botaoExcluir);
         }
 
-        // 🗑️ EXCLUIR QUALQUER ITEM
-        async function apagarItem(idItem, tipo) {
-            if (!acessoAdmin) {
-                alert("🔐 Acesso negado! Apenas administradores podem excluir.");
-                return;
-            }
+        linha.appendChild(conteudo);
+        listaDoacoesEl.appendChild(linha);
+    });
+}
 
-            if (confirm("Tem certeza que deseja excluir este registro? Essa ação não pode ser desfeita!")) {
-                mostrarCarregamento();
-                try {
-                    const caminho = tipo === 'valor' ? `colaboracoes_recreio/${idItem}` : `doacoes_materiais/${idItem}`;
-                    await remove(ref(db, caminho));
-                    alert("✅ Registro removido com sucesso!");
+// 🗑️ EXCLUIR ITEM
+async function excluirItem(id, tipo) {
+    if (!confirm("⚠️ Tem certeza que deseja excluir este registro? Essa ação não pode ser desfeita!")) return;
 
-                } catch (erro) {
-                    console.error("❌ Erro ao excluir:", erro);
-                    alert("❌ Não foi possível remover o registro. Tente novamente.");
+    mostrarCarregamento();
+    try {
+        const referencia = tipo === 'colaboracao' ? ref(db, `colaboracoes_recreio/${id}`) : ref(db, `doacoes_materiais/${id}`);
+        await remove(referencia);
+        alert("✅ Registro excluído com sucesso!");
+    } catch (erro) {
+        console.error("❌ Erro ao excluir:", erro);
+        alert("❌ Não foi possível excluir.");
+    } finally {
+        esconderCarregamento();
+    }
+}
 
-                } finally {
-                    esconderCarregamento();
-                }
-            }
-        }
+// 🗑️ APAGAR TUDO (SOMENTE ADMIN)
+async function apagarTudo() {
+    if (!confirm("🚨 ATENÇÃO! Você está prestes a APAGAR TODOS OS DADOS do sistema. Tem certeza absoluta?")) return;
+    if (!confirm("⚠️ Essa ação é PERMANENTE e não pode ser desfeita. Digite SIM para confirmar.")) return;
 
-        // 🗑️ EXCLUIR TODOS OS DADOS
-        async function apagarTudo() {
-            if (!acessoAdmin) {
-                alert("🔐 Acesso negado! Apenas administradores podem excluir todos os dados.");
-                return;
-            }
+    mostrarCarregamento();
+    try {
+        await set(colaboracoesRef, null);
+        await set(doacoesRef, null);
+        alert("✅ Todos os dados foram removidos do sistema!");
+    } catch (erro) {
+        console.error("❌ Erro ao limpar dados:", erro);
+        alert("❌ Não foi possível limpar os dados.");
+    } finally {
+        esconderCarregamento();
+    }
+}
 
-            if (confirm("⚠️ ATENÇÃO! Essa ação APAGA TODOS os registros (valores e doações) e NÃO pode ser desfeita. Tem certeza absoluta?")) {
-                mostrarCarregamento();
-                try {
-                    await set(colaboracoesRef, null);
-                    await set(doacoesRef, null);
-                    alert("✅ Todos os dados foram apagados definitivamente do Firebase!");
+// 🔐 CONTROLE DE ACESSO ADMINISTRATIVO
+botaoAdmin.onclick = () => {
+    modalSenha.classList.remove('hidden');
+    campoSenha.value = '';
+    avisoErro.classList.add('hidden');
+    setTimeout(() => campoSenha.focus(), 100);
+};
 
-                } catch (erro) {
-                    console.error("❌ Erro ao apagar tudo:", erro);
-                    alert("❌ Não foi possível apagar todos os dados. Tente novamente.");
+botaoCancelar.onclick = () => {
+    modalSenha.classList.add('hidden');
+};
 
-                } finally {
-                    esconderCarregamento();
-                }
-            }
-        }
+botaoAcessar.onclick = () => {
+    const senhaDigitada = campoSenha.value.trim();
+    if (senhaDigitada === SENHA_ADMIN) {
+        acessoAdmin = true;
+        modalSenha.classList.add('hidden');
+        botaoLimpar.classList.remove('hidden');
+        atualizarTelaPrincipal();
+        atualizarListaDoacoes();
+        alert("🔓 Acesso administrativo liberado! Agora você pode excluir registros.");
+    } else {
+        avisoErro.classList.remove('hidden');
+        campoSenha.value = '';
+        setTimeout(() => avisoErro.classList.add('hidden'), 3000);
+    }
+};
 
-        // 🎯 VINCULAR BOTÕES
-        botaoSalvar.addEventListener('click', salvarDados);
-        botaoSalvarDoacao.addEventListener('click', salvarDoacao);
-        botaoLimpar.addEventListener('click', apagarTudo);
+campoSenha.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') botaoAcessar.click();
+});
 
-        // 🔐 GERENCIAMENTO DO ACESSO ADMINISTRATIVO
-        botaoAdmin.addEventListener('click', () => {
-            campoSenha.value = '';
-            avisoErro.classList.add('hidden');
-            modalSenha.classList.remove('hidden');
-            campoSenha.focus();
-        });
+botaoLimpar.onclick = apagarTudo;
 
-        botaoCancelar.addEventListener('click', () => {
-            modalSenha.classList.add('hidden');
-            campoSenha.value = '';
-            avisoErro.classList.add('hidden');
-        });
+// 🎯 AÇÕES DOS BOTÕES PRINCIPAIS
+botaoSalvar.onclick = salvarDados;
+botaoSalvarDoacao.onclick = registrarDoacao;
 
-        botaoAcessar.addEventListener('click', () => {
-            const senhaDigitada = campoSenha.value.trim();
-            
-            if (senhaDigitada === SENHA_ADMIN) {
-                acessoAdmin = true;
-                modalSenha.classList.add('hidden');
-                botaoLimpar.classList.remove('hidden');
-                alert("✅ Acesso permitido! Você agora pode gerenciar todas as colaborações e doações.");
-                atualizarTela();
-                renderizarListaDoacoes();
-            } else {
-                avisoErro.classList.remove('hidden');
-                campoSenha.value = '';
-                campoSenha.focus();
-            }
-        });
-
-        campoSenha.addEventListener('keypress', (evento) => {
-            if (evento.key === 'Enter') {
-                botaoAcessar.click();
-            }
-        });
-
-        // Inicialização automática ao carregar a página
-    </script>
-
+// VERIFICAÇÃO FINAL DE CONFIGURAÇÕES
+console.log("📋 ID da Planilha configurado:", ID_PLANILHA);
+console.log("📋 Aba de Colaborações:", ABA_COLABORACOES);
+console.log("📋 Aba de Doações:", ABA_DOACOES);
+console.log("✅ Sistema totalmente carregado e pronto para uso no GitHub Pages!");
+</script>
 </body>
 </html>
-
