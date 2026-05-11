@@ -138,7 +138,7 @@
                         </div>
 
                         <button 
-                            onclick="salvarDados()"
+                            id="botaoSalvar"
                             class="w-full bg-primario hover:bg-primario/90 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
                         >
                             <i class="fa fa-save"></i> Salvar Minha Colaboração
@@ -154,7 +154,6 @@
 
                     <button 
                         id="botaoLimpar"
-                        onclick="apagarTudo()"
                         class="w-full mt-4 bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 hidden"
                     >
                         🗑️ APAGAR TODOS OS DADOS
@@ -238,12 +237,12 @@
         </div>
     </div>
 
-    <!-- 🚀 CÓDIGO DO FIREBASE — IGUAL AO PROJETO DA AW 🚀 -->
+    <!-- 🚀 CÓDIGO DO FIREBASE CORRIGIDO 🚀 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-        // ⚙️ DADOS DE CONEXÃO — COLOQUE AQUI OS MESMOS DADOS QUE VOCÊ USA NO PROJETO DA AW
+        // ⚙️ DADOS DE CONEXÃO DO SEU PROJETO WILLOBRAS
         const firebaseConfig = {
             apiKey: "AIzaSyDUgHEX610xqLmEmM6F_d0sOzbYxLLxT8w",
             authDomain: "willobras.firebaseapp.com",
@@ -254,10 +253,9 @@
             appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
         };
 
-        // INICIALIZAÇÃO — IGUALZINHO O QUE VOCÊ JÁ USA
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const colaboracoesRef = ref(db, "colaboracoes_recreio"); // NOME PRÓPRIO PARA NÃO MISTURAR COM OS OUTROS DADOS
+        const colaboracoesRef = ref(db, "colaboracoes_recreio");
 
         // CONFIGURAÇÕES
         const SENHA_ADMIN = "WJ321";
@@ -267,6 +265,7 @@
         // ELEMENTOS DA PÁGINA
         const campoNome = document.getElementById('nome');
         const campoValor = document.getElementById('valor');
+        const botaoSalvar = document.getElementById('botaoSalvar');
         const botaoAdmin = document.getElementById('botaoAdmin');
         const botaoLimpar = document.getElementById('botaoLimpar');
         const modalSenha = document.getElementById('modalSenha');
@@ -287,28 +286,28 @@
         }
 
         function esconderCarregamento() {
-    areaCarregamento.classList.add('escondido');
-}
+            areaCarregamento.classList.add('escondido');
+        }
 
-function formatarValor(valorTexto) {
-    let valorLimpo = valorTexto.replace(/\./g, '');
-    valorLimpo = valorLimpo.replace(',', '.');
-    return parseFloat(valorLimpo) || 0;
-}
+        function formatarValor(valorTexto) {
+            let valorLimpo = valorTexto.replace(/\./g, '');
+            valorLimpo = valorLimpo.replace(',', '.');
+            return parseFloat(valorLimpo) || 0;
+        }
 
-function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2
-    });
-}
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 2
+            });
+        }
 
-// 🚀 SALVAR DADOS DIRETAMENTE NO FIREBASE — IGUAL AO PROJETO DA AW
-async function salvarDados() {
-    const nome = campoNome.value.trim();
-    const valor = formatarValor(campoValor.value.trim());
+        // 🚀 SALVAR DADOS NO FIREBASE
+        async function salvarDados() {
+            const nome = campoNome.value.trim();
+            const valor = formatarValor(campoValor.value.trim());
 
     if (!nome) {
         alert("⚠️ Digite seu nome!");
@@ -322,7 +321,6 @@ async function salvarDados() {
     mostrarCarregamento();
 
     try {
-        // Salva no Firebase, dentro do espaço exclusivo para esse projeto
         await push(colaboracoesRef, {
             nome: nome,
             valor: valor,
@@ -342,14 +340,13 @@ async function salvarDados() {
     }
 }
 
-// 📥 CARREGAR DADOS EM TEMPO REAL DO FIREBASE — ASSIM COMO VOCÊ JÁ CONHECE
+// 📥 CARREGAR DADOS EM TEMPO REAL DO FIREBASE
 onValue(colaboracoesRef, (snapshot) => {
     mostrarCarregamento();
     listaColaboradores = [];
 
     if (snapshot.exists()) {
         const dados = snapshot.val();
-        // Transforma os dados do Firebase em lista
         listaColaboradores = Object.entries(dados).map(([chave, dadosItem]) => ({
             id: chave,
             nome: dadosItem.nome,
@@ -357,7 +354,6 @@ onValue(colaboracoesRef, (snapshot) => {
             dataCadastro: dadosItem.dataCadastro
         }));
 
-        // Ordena do mais novo para o mais antigo
         listaColaboradores.reverse();
     }
 
@@ -370,18 +366,15 @@ onValue(colaboracoesRef, (snapshot) => {
     esconderCarregamento();
 });
 
-// 🔄 ATUALIZAR TUDO NA TELA
+// 🔄 ATUALIZAR TODOS OS DADOS NA TELA
 function atualizarTela() {
-    // Calcular totais
     const total = listaColaboradores.reduce((soma, item) => soma + item.valor, 0);
     const quantidade = listaColaboradores.length;
 
-    // Atualizar valores
     totalGeral.textContent = formatarMoeda(total);
     quantidadePessoas.textContent = quantidade;
     contadorLista.textContent = `${quantidade} pessoa(s)`;
 
-    // Atualizar soma na calculadora
     if (quantidade === 0) {
         resultadoCalculo.textContent = '0,00';
     } else {
@@ -389,10 +382,10 @@ function atualizarTela() {
         resultadoCalculo.textContent = termos.join(' + ');
     }
 
-    // Atualizar lista
     renderizarLista();
 }
 
+// 📋 EXIBIR LISTA DE COLABORADORES
 function renderizarLista() {
     listaColaboradoresEl.innerHTML = '';
 
@@ -427,7 +420,7 @@ function renderizarLista() {
     });
 }
 
-// 🗑️ Função para apagar um item específico do Firebase
+// 🗑️ EXCLUIR UM REGISTRO ESPECÍFICO
 async function apagarItem(idItem) {
     if (!acessoAdmin) {
         alert("🔐 Acesso negado! Apenas administradores podem excluir.");
@@ -450,7 +443,7 @@ async function apagarItem(idItem) {
     }
 }
 
-// 🗑️ Função para apagar TODOS os dados do Firebase
+// 🗑️ EXCLUIR TODOS OS DADOS DO BANCO
 async function apagarTudo() {
     if (!acessoAdmin) {
         alert("🔐 Acesso negado! Apenas administradores podem excluir todos os dados.");
@@ -473,7 +466,11 @@ async function apagarTudo() {
     }
 }
 
-// 🔐 Eventos do modal de senha
+// 🎯 VINCULAR OS BOTÕES ÀS FUNÇÕES — ESSA É A PARTE QUE ESTAVA FALTANDO! 🎯
+botaoSalvar.addEventListener('click', salvarDados);
+botaoLimpar.addEventListener('click', apagarTudo);
+
+// 🔐 GERENCIAMENTO DO ACESSO ADMINISTRATIVO
 botaoAdmin.addEventListener('click', () => {
     campoSenha.value = '';
     avisoErro.classList.add('hidden');
@@ -509,7 +506,7 @@ campoSenha.addEventListener('keypress', (evento) => {
     }
 });
 
-// Inicialização — os dados já vêm direto do Firebase automaticamente
+// Inicialização automática ao carregar a página
 </script>
 
 </body>
