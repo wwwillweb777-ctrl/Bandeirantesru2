@@ -289,20 +289,20 @@
         </div>
     </div>
 
-    <!-- 🚀 CÓDIGO FIREBASE + PLANILHA GOOGLE - 100% CONFIGURADO -->
+    <!-- 🚀 CÓDIGO FIREBASE + APPS SCRIPT + PLANILHA - TUDO INTEGRADO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         // ⚙️ DADOS DE CONEXÃO DO SEU PROJETO
-const firebaseConfig = {
-    apiKey: "AIzaSyDUgHEX610xqLmEmM6F_d0sOzbYxLLxT8w",
-    authDomain: "willobras.firebaseapp.com",
-    databaseURL: "https://willobras-default-rtdb.firebaseio.com",
-    projectId: "willobras",
-    storageBucket: "willobras.firebasestorage.app",
-    messagingSenderId: "66370500400",
-    appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUgHEX610xqLmEmM6F_d0sOzbYxLLxT8w",
+authDomain: "willobras.firebaseapp.com",
+databaseURL: "https://willobras-default-rtdb.firebaseio.com",
+projectId: "willobras",
+storageBucket: "willobras.firebasestorage.app",
+messagingSenderId: "66370500400",
+appId: "1:66370500400:web:42d6569ca2c8172ddf3af5"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -310,10 +310,13 @@ const db = getDatabase(app);
 const colaboracoesRef = ref(db, "colaboracoes_recreio");
 const doacoesRef = ref(db, "doacoes_materiais");
 
-// 📊 DADOS DA SUA PLANILHA GOOGLE - CONFIGURADO 100%
+// 📊 DADOS DA SUA PLANILHA GOOGLE E APPS SCRIPT - CONFIGURADO 100%
 const ID_PLANILHA = "1qlgjXmXduR7QNp-kyfn2bNvUNNHIRvYZIFki9pDgFbE";
 const ABA_COLABORACOES = "Colaborações";
 const ABA_DOACOES = "Doações";
+
+// ✅ LINK DO SEU APPS SCRIPT (COLE AQUI O LINK GERADO)
+const LINK_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzTREaIFx9OhlR7eAJT5hUVOK-6Mf63v9RoB4bTC2DHjDTWCBpA018oVbtUXbeThOvr/exec";
 
 // CONFIGURAÇÕES DO SISTEMA
 const SENHA_ADMIN = "WJ321";
@@ -345,39 +348,36 @@ const campoDescricaoDoacao = document.getElementById('descricaoDoacao');
 const botaoSalvarDoacao = document.getElementById('botaoSalvarDoacao');
 const listaDoacoesEl = document.getElementById('listaDoacoes');
 
-// 📤 FUNÇÃO DIRETA - SEM SCRIPT, FUNCIONA NO GITHUB E EM QUALQUER LUGAR
+// 📤 FUNÇÃO INTEGRADA: FIREBASE + APPS SCRIPT + PLANILHA GOOGLE
 async function salvarNaPlanilha(dados, tipo) {
     try {
         let nomeAba = tipo === 'colaboracao' ? ABA_COLABORACOES : ABA_DOACOES;
-        let linhaDados = [];
+        let dadosEnvio = {
+            idPlanilha: ID_PLANILHA,
+            aba: nomeAba,
+            data: dados.dataCadastro,
+            nome: dados.nome
+        };
 
-        // Monta os dados na ordem exata das colunas configuradas
         if (tipo === 'colaboracao') {
-            linhaDados = [
-                dados.dataCadastro,  // Coluna A: Data e Hora
-                dados.nome,          // Coluna B: Nome Completo
-                dados.valor          // Coluna C: Valor (R$)
-            ];
-        } else if (tipo === 'doacao') {
-            linhaDados = [
-                dados.dataCadastro,  // Coluna A: Data e Hora
-                dados.nome,          // Coluna B: Nome Completo
-                dados.descricao      // Coluna C: O que foi doado / oferecido
-            ];
+            dadosEnvio.valor = dados.valor;
+        } else {
+            dadosEnvio.descricao = dados.descricao;
         }
 
-        // Método direto, apenas com o ID da planilha
-        const url = `https://docs.google.com/spreadsheets/d/${ID_PLANILHA}/gviz/tq?tqx=out:json&tq=INSERT INTO ${nomeAba} VALUES ${JSON.stringify(linhaDados)}`;
-
-        await fetch(url, {
-            method: 'GET',
+        // Envia dados para o Apps Script
+        const resposta = await fetch(LINK_APPS_SCRIPT, {
+            method: 'POST',
             mode: 'no-cors',
-            cache: 'no-cache'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dadosEnvio)
         });
 
-        console.log("✅ Dados enviados para a Planilha Google com sucesso!");
+        console.log("✅ Dados enviados para Planilha Google com sucesso!");
     } catch (erro) {
-        console.log("ℹ️ Aviso: Dados salvos no Firebase e na Planilha normalmente", erro.message);
+        console.error("⚠️ Erro ao salvar na planilha:", erro);
     }
 }
 
@@ -432,7 +432,7 @@ async function salvarDados() {
 
         // Salva no Firebase
         await push(colaboracoesRef, dadosParaSalvar);
-        // Salva na Planilha Google
+        // Salva na Planilha Google via Apps Script
         await salvarNaPlanilha(dadosParaSalvar, 'colaboracao');
 
         campoNome.value = '';
@@ -441,7 +441,7 @@ async function salvarDados() {
 
     } catch (erro) {
         console.error("❌ Erro ao salvar:", erro);
-        alert("❌ Ocorreu um erro ao salvar. Tente novamente.");
+        alert("❌ Ocorreu um erro ao salvar. Tente novamente ou verifique sua conexão.");
     } finally {
         esconderCarregamento();
     }
@@ -472,7 +472,7 @@ async function registrarDoacao() {
 
         // Salva no Firebase
         await push(doacoesRef, dadosParaSalvar);
-        // Salva na Planilha Google
+        // Salva na Planilha Google via Apps Script
         await salvarNaPlanilha(dadosParaSalvar, 'doacao');
 
         campoNomeDoacao.value = '';
@@ -673,11 +673,10 @@ botaoLimpar.onclick = apagarTudo;
 botaoSalvar.onclick = salvarDados;
 botaoSalvarDoacao.onclick = registrarDoacao;
 
-// VERIFICAÇÃO FINAL DE CONFIGURAÇÕES
+// ✅ VERIFICAÇÃO FINAL
 console.log("📋 ID da Planilha configurado:", ID_PLANILHA);
-console.log("📋 Aba de Colaborações:", ABA_COLABORACOES);
-console.log("📋 Aba de Doações:", ABA_DOACOES);
-console.log("✅ Sistema totalmente carregado e pronto para uso no GitHub Pages!");
+console.log("📋 Link do Apps Script configurado:", LINK_APPS_SCRIPT);
+console.log("✅ Sistema totalmente integrado: Firebase + Apps Script + Planilha Google!");
 </script>
 </body>
 </html>
