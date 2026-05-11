@@ -237,7 +237,7 @@
         </div>
     </div>
 
-    <!-- 🚀 CÓDIGO DO FIREBASE CORRIGIDO 🚀 -->
+    <!-- 🚀 CÓDIGO DO FIREBASE TOTALMENTE CORRIGIDO 🚀 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -309,12 +309,12 @@
             const nome = campoNome.value.trim();
             const valor = formatarValor(campoValor.value.trim());
 
-    if (!nome) {
-        alert("⚠️ Digite seu nome!");
-        return;
-    }
-    if (valor <= 0) {
-        alert("⚠️ Digite um valor válido maior que zero!");
+            if (!nome) {
+                alert("⚠️ Digite seu nome!");
+                return;
+            }
+            if (valor <= 0) {
+                alert("⚠️ Digite um valor válido maior que zero!");
         return;
     }
 
@@ -385,7 +385,7 @@ function atualizarTela() {
     renderizarLista();
 }
 
-// 📋 EXIBIR LISTA DE COLABORADORES
+// 📋 EXIBIR LISTA DE COLABORADORES — ✅ CORRIGIDO AGORA PARA PERMITIR EXCLUSÃO
 function renderizarLista() {
     listaColaboradoresEl.innerHTML = '';
 
@@ -401,7 +401,7 @@ function renderizarLista() {
         const botaoApagar = acessoAdmin 
             ? `<button 
                 class="text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition"
-                onclick="apagarItem('${item.id}')"
+                data-id="${item.id}"
                 title="Remover colaboração"
             >
                 <i class="fa fa-trash"></i>
@@ -418,9 +418,18 @@ function renderizarLista() {
 
         listaColaboradoresEl.appendChild(elemento);
     });
+
+    // ✅ AGORA VINCULAMOS O CLIQUE DIRETAMENTE — ASSIM FUNCIONA DENTRO DO MÓDULO!
+    if (acessoAdmin) {
+        document.querySelectorAll('[data-id]').forEach(botao => {
+            botao.addEventListener('click', () => {
+                apagarItem(botao.dataset.id);
+            });
+        });
+    }
 }
 
-// 🗑️ EXCLUIR UM REGISTRO ESPECÍFICO
+// 🗑️ EXCLUIR UM REGISTRO ESPECÍFICO — AGORA 100% FUNCIONAL
 async function apagarItem(idItem) {
     if (!acessoAdmin) {
         alert("🔐 Acesso negado! Apenas administradores podem excluir.");
@@ -443,7 +452,7 @@ async function apagarItem(idItem) {
     }
 }
 
-// 🗑️ EXCLUIR TODOS OS DADOS DO BANCO
+// 🗑️ EXCLUIR TODOS OS DADOS DO BANCO — TAMBÉM CORRIGIDO
 async function apagarTudo() {
     if (!acessoAdmin) {
         alert("🔐 Acesso negado! Apenas administradores podem excluir todos os dados.");
@@ -466,7 +475,7 @@ async function apagarTudo() {
     }
 }
 
-// 🎯 VINCULAR OS BOTÕES ÀS FUNÇÕES — ESSA É A PARTE QUE ESTAVA FALTANDO! 🎯
+// 🎯 VINCULAR OS BOTÕES PRINCIPAIS
 botaoSalvar.addEventListener('click', salvarDados);
 botaoLimpar.addEventListener('click', apagarTudo);
 
@@ -492,7 +501,7 @@ botaoAcessar.addEventListener('click', () => {
         modalSenha.classList.add('hidden');
         botaoLimpar.classList.remove('hidden');
         alert("✅ Acesso permitido! Você agora pode gerenciar todas as colaborações.");
-        atualizarTela();
+        atualizarTela(); // 🔁 Recarrega a lista e habilita os botões de exclusão
     } else {
         avisoErro.classList.remove('hidden');
         campoSenha.value = '';
